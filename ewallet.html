@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Wallet</title>
+
+    <!-- Favicon for the Browser Tab -->
+    <link rel="icon" href="logo.jpg" type="image/jpg">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f5e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        button {
+            background-color: #2e7d32;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #1b5e20;
+        }
+
+        .error {
+            color: red;
+            font-size: 16px;
+        }
+
+        .success {
+            color: green;
+            font-size: 16px;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            background-color: #388e3c;
+            margin: 5px;
+            font-size: 12px;
+        }
+
+        .transaction-history {
+            margin-top: 20px;
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .transaction-history p {
+            margin: 5px 0;
+        }
+
+        /* Style for logo */
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo Section -->
+    <div class="logo">
+        <img src="logo.jpg" alt="E-Wallet Logo" class="img-fluid">
+    </div>
+
+    <div class="container">
+        <h2><i class="fas fa-wallet"></i> E-Wallet</h2>
+
+        <p><i class="fas fa-credit-card"></i> Saldo E-Wallet Anda: <span id="ewalletBalance">Rp 5.000.000</span></p>
+        
+        <form id="topUpForm">
+            <div>
+                <label for="topUpAmount"><i class="fas fa-arrow-circle-up"></i> Jumlah Top Up</label>
+                <input type="number" id="topUpAmount" placeholder="Masukkan jumlah top up" required>
+            </div>
+
+            <button type="submit"><i class="fas fa-plus-circle"></i> Top Up Saldo</button>
+        </form>
+
+        <form id="transferForm">
+            <div>
+                <label for="recipient"><i class="fas fa-phone"></i> Nomor Tujuan</label>
+                <input type="text" id="recipient" placeholder="Masukkan nomor tujuan" required>
+            </div>
+
+            <div>
+                <label for="transferAmount"><i class="fas fa-money-bill-wave"></i> Jumlah Transfer</label>
+                <input type="number" id="transferAmount" placeholder="Masukkan jumlah transfer" required>
+            </div>
+
+            <button type="submit"><i class="fas fa-paper-plane"></i> Kirim Uang</button>
+        </form>
+
+        <p id="errorMessage" class="error" style="display:none;"></p>
+        <p id="successMessage" class="success" style="display:none;"></p>
+        
+        <!-- Display Transaction History -->
+        <div id="transactionHistory" class="transaction-history">
+            <h4>Riwayat Transaksi</h4>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Home</button>
+        <button onclick="window.location.href='history.html'"><i class="fas fa-history"></i> History</button>
+        <button onclick="window.location.href='scan.html'"><i class="fas fa-qrcode"></i> Scan</button>
+        <button onclick="window.location.href='tabungan.html'"><i class="fas fa-plus-circle"></i> Tabungan</button>
+    </div>
+
+    <script>
+        // Initial balance from localStorage or default
+        let currentBalance = localStorage.getItem('balance') ? parseInt(localStorage.getItem('balance')) : 5000000;
+        document.getElementById('ewalletBalance').innerText = "Rp " + currentBalance.toLocaleString();
+
+        // Load transaction history from localStorage
+        function loadTransactionHistory() {
+            const history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            history.forEach(transaction => {
+                const transactionDiv = document.createElement('div');
+                transactionDiv.innerHTML = `<p>${transaction.type}: Rp ${transaction.amount.toLocaleString()} (${transaction.date})</p>`;
+                historyList.appendChild(transactionDiv);
+            });
+        }
+
+        // Handle the top-up form submission
+        document.getElementById('topUpForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const topUpAmount = parseInt(document.getElementById('topUpAmount').value);
+
+            if (isNaN(topUpAmount) || topUpAmount <= 0) {
+                showError("Silakan masukkan jumlah yang valid.");
+                return;
+            }
+
+            currentBalance += topUpAmount;
+            localStorage.setItem('balance', currentBalance);
+
+            // Add transaction to history
+            const transaction = {
+                type: 'Top Up',
+                amount: topUpAmount,
+                date: new Date().toLocaleString()
+            };
+            let history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+            history.push(transaction);
+            localStorage.setItem('transactionHistory', JSON.stringify(history));
+
+            document.getElementById('ewalletBalance').innerText = "Rp " + currentBalance.toLocaleString();
+            showSuccess(`Top up sebesar Rp ${topUpAmount.toLocaleString()} berhasil.`);
+            document.getElementById('topUpAmount').value = '';
+            loadTransactionHistory();
+        });
+
+        // Handle the transfer form submission
+        document.getElementById('transferForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const recipient = document.getElementById('recipient').value;
+            const transferAmount = parseInt(document.getElementById('transferAmount').value);
+
+            if (!recipient || isNaN(transferAmount) || transferAmount <= 0) {
+                showError("Silakan masukkan nomor tujuan yang valid dan jumlah yang valid.");
+                return;
+            }
+
+            if (transferAmount > currentBalance) {
+                showError("Saldo Anda tidak cukup untuk melakukan transfer.");
+                return;
+            }
+
+            currentBalance -= transferAmount;
+            localStorage.setItem('balance', currentBalance);
+
+            // Add transaction to history
+            const transaction = {
+                type: 'Transfer',
+                amount: transferAmount,
+                date: new Date().toLocaleString()
+            };
+            let history = JSON.parse(localStorage.getItem('transactionHistory')) || [];
+            history.push(transaction);
+            localStorage.setItem('transactionHistory', JSON.stringify(history));
+
+            document.getElementById('ewalletBalance').innerText = "Rp " + currentBalance.toLocaleString();
+            showSuccess(`Transfer sebesar Rp ${transferAmount.toLocaleString()} ke nomor tujuan ${recipient} berhasil.`);
+            document.getElementById('recipient').value = '';
+            document.getElementById('transferAmount').value = '';
+            loadTransactionHistory();
+        });
+
+        function showError(message) {
+            document.getElementById('errorMessage').innerText = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successMessage').innerText = message;
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Load the transaction history when the page loads
+        loadTransactionHistory();
+    </script>
+</body>
+</html>

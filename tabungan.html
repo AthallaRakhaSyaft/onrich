@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabungan</title>
+
+    <!-- Favicon (Logo Icon) -->
+    <link rel="icon" href="logo.jpg" type="image/jpg">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background-color: #1b5e20;
+        }
+
+        .balance-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #2e7d32;
+        }
+
+        .transaction-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .delete-button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #f44336;
+            border-radius: 8px;
+            color: white;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-button i {
+            margin-right: 8px;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .delete-transaction-button {
+            background-color: #f44336;
+            border: none;
+            padding: 5px 10px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-transaction-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo -->
+    <img src="logo.jpg" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+
+    <div class="container">
+        <h2><i class="fas fa-wallet"></i> Tabungan</h2>
+        <p>Tabungan Anda saat ini: <strong id="current-balance">Rp 11.000.000</strong></p>
+        <p>Masukkan jumlah uang yang ingin Anda tambahkan ke Tabungan Anda.</p>
+
+        <input type="number" id="amount" placeholder="Jumlah" min="1">
+        <button onclick="addFunds()">
+            <i class="fas fa-plus-circle"></i> Tambah Tabungan
+        </button>
+
+        <!-- Balance Information Display -->
+        <div class="balance-info" id="balance-info"></div>
+
+        <!-- Transaction Information Display -->
+        <div class="transaction-info" id="transaction-info"></div>
+
+        <!-- Delete Data Button -->
+        <button class="delete-button" onclick="deleteData()">
+            <i class="fas fa-trash-alt"></i> Hapus Data
+        </button>
+    </div>
+
+    <script>
+        // Function to display current balance and transaction info when page loads
+        window.onload = function() {
+            var currentBalance = localStorage.getItem("balance") || 11000000; // Default balance if not set
+            document.getElementById("current-balance").innerText = "Rp " + parseInt(currentBalance).toLocaleString();
+            document.getElementById("balance-info").innerText = "Tabungan Anda saat ini: Rp " + parseInt(currentBalance).toLocaleString();
+
+            // Display transaction information if available
+            var transactionList = JSON.parse(localStorage.getItem("transactionList")) || [];
+            var transactionInfo = "<strong>Daftar Transaksi:</strong><br>";
+            transactionList.forEach(function(transaction, index) {
+                transactionInfo += 
+                    "No. Transaksi: " + transaction.number + "<br>" +
+                    "Tanggal: " + transaction.date + "<br>" +
+                    "Waktu: " + transaction.time + "<br>" +
+                    "Tabungan Anda Saat Ini: Rp " + transaction.balance.toLocaleString() + "<br>" +
+                    '<button class="delete-transaction-button" onclick="deleteTransaction(' + index + ')">Hapus Transaksi</button>' + 
+                    "<br><br>";
+            });
+            document.getElementById("transaction-info").innerHTML = transactionInfo;
+        }
+
+        // Function to add funds and update balance
+        function addFunds() {
+            var amount = document.getElementById("amount").value;
+
+            if (amount && amount > 0) {
+                var currentBalance = localStorage.getItem("balance") || 11000000;
+                currentBalance = parseInt(currentBalance);
+
+                var newBalance = currentBalance + parseInt(amount);
+
+                localStorage.setItem("balance", newBalance);
+
+                var currentDate = new Date();
+                var dateString = currentDate.toLocaleDateString();
+                var timeString = currentDate.toLocaleTimeString();
+
+                var transactionList = JSON.parse(localStorage.getItem("transactionList")) || [];
+
+                var newTransaction = {
+                    number: transactionList.length + 1,
+                    date: dateString,
+                    time: timeString,
+                    balance: newBalance
+                };
+
+                transactionList.push(newTransaction);
+
+                localStorage.setItem("transactionList", JSON.stringify(transactionList));
+
+                document.getElementById("current-balance").innerText = "Rp " + newBalance.toLocaleString();
+                document.getElementById("balance-info").innerText = "Tabungan Anda saat ini: Rp " + newBalance.toLocaleString();
+
+                var transactionInfo = "<strong>Daftar Transaksi:</strong><br>";
+                transactionList.forEach(function(transaction, index) {
+                    transactionInfo += 
+                        "No. Transaksi: " + transaction.number + "<br>" +
+                        "Tanggal: " + transaction.date + "<br>" +
+                        "Waktu: " + transaction.time + "<br>" +
+                        "Saldo Saat Ini: Rp " + transaction.balance.toLocaleString() + "<br>" +
+                        '<button class="delete-transaction-button" onclick="deleteTransaction(' + index + ')">Hapus Transaksi</button>' + 
+                        "<br><br>";
+                });
+                document.getElementById("transaction-info").innerHTML = transactionInfo;
+
+                alert("Tabungan berhasil ditambahkan! Tabungan Anda sekarang: Rp " + newBalance.toLocaleString());
+            } else {
+                alert("Harap masukkan jumlah yang valid.");
+            }
+        }
+
+        // Function to delete all data from localStorage
+        function deleteData() {
+            localStorage.removeItem("balance");
+            localStorage.removeItem("transactionList");
+
+            document.getElementById("current-balance").innerText = "Rp 11.000.000";
+            document.getElementById("balance-info").innerText = "Tabungan Anda saat ini: Rp 11.000.000";
+            document.getElementById("transaction-info").innerHTML = "";
+
+            alert("Semua data berhasil dihapus.");
+        }
+
+        // Function to delete a specific transaction
+        function deleteTransaction(index) {
+            var transactionList = JSON.parse(localStorage.getItem("transactionList")) || [];
+
+            // Remove the transaction from the list
+            transactionList.splice(index, 1);
+
+            // Update the transaction list in localStorage
+            localStorage.setItem("transactionList", JSON.stringify(transactionList));
+
+            // Reload the transaction info display
+            window.onload();
+
+            alert("Transaksi berhasil dihapus.");
+        }
+    </script>
+</body>
+</html>

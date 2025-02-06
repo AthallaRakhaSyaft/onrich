@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keuangan</title>
+
+    <!-- Favicon for the Browser Tab -->
+    <link rel="icon" href="logo.jpg" type="image/jpg">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e8f5e9;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .transaction-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .transaction-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f1f8e9;
+            border-radius: 8px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-item i {
+            color: #388e3c;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            background-color: #388e3c;
+            margin: 5px;
+            font-size: 12px;
+        }
+
+        .btn-add-transaction {
+            background-color: #388e3c;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .btn-add-transaction:hover {
+            background-color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="logo">
+            <img src="logo.jpg" alt="E-Wallet Logo" class="img-fluid">
+        </div>
+        <h2><i class="fas fa-history"></i> Keuangan</h2>
+
+        <!-- Add Transaction Button -->
+        <a href="tambah-transaksi.html" class="btn-add-transaction">
+            <i class="fas fa-plus-circle"></i> Tambah Transaksi
+        </a>
+
+        <!-- List of Transactions -->
+        <ul id="transactionList" class="transaction-list"></ul>
+
+        <div id="noTransactionsMessage" class="text-center" style="display: none;">
+            <p>Belum ada transaksi yang tercatat.</p>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Home</button>
+        <button onclick="window.location.href='history.html'"><i class="fas fa-history"></i> History</button>
+        <button onclick="window.location.href='scan.html'"><i class="fas fa-qrcode"></i> Scan</button>
+        <button onclick="window.location.href='tabungan.html'"><i class="fas fa-plus-circle"></i> Tabungan</button>
+    </div>
+
+    <script>
+        // Retrieve transaction history from localStorage
+        let transactionHistory = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        const transactionList = document.getElementById('transactionList');
+        const noTransactionsMessage = document.getElementById('noTransactionsMessage');
+
+        // If there are no transactions, show the message
+        if (transactionHistory.length === 0) {
+            noTransactionsMessage.style.display = 'block';
+        } else {
+            noTransactionsMessage.style.display = 'none';
+
+            // Display each transaction in the list
+            transactionHistory.forEach((transaction) => {
+                const li = document.createElement('li');
+                li.classList.add('transaction-item');
+                li.innerHTML = `
+                    <div>
+                        <strong><i class="fas fa-user"></i> Penerima:</strong> ${transaction.recipient}
+                    </div>
+                    <div>
+                        <strong><i class="fas fa-dollar-sign"></i> Jumlah:</strong> Rp ${transaction.amount.toLocaleString()}
+                    </div>
+                    <div>
+                        <small><i class="fas fa-calendar-alt"></i> Tanggal: ${transaction.date}</small>
+                    </div>
+                `;
+                transactionList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
