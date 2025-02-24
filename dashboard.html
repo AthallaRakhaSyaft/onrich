@@ -173,10 +173,14 @@
 
     <div class="container" id="dashboard-container">
         <h2>Dashboard</h2>
-        <p>Saldo: <span id="saldo">Rp 15.000.000</span></p>
+        <p>
+            <i class="fas fa-money-bill-wave"></i> <strong>Saldo:</strong> 
+            <span id="saldo">Rp 15.000.000</span>
+        </p>        
         <input type="number" id="amount" placeholder="Jumlah"> 
-        <button onclick="addBalance()">Tambah Saldo</button>
-        <button onclick="logout()">Logout</button>
+        <button onclick="addBalance()">
+            <i class="fas fa-plus-circle"></i> Tambah Saldo
+        </button>
 
         <button onclick="window.location.href='mengirim.html'"><i class="fas fa-paper-plane"></i> Mengirim</button>
         <button onclick="window.location.href='meminta.html'"><i class="fas fa-hand-holding-usd"></i> Meminta</button>
@@ -184,6 +188,9 @@
         <button onclick="window.location.href='ewallet.html'"><i class="fas fa-wallet"></i> E-Wallet</button>
         <button onclick="window.location.href='keuangan.html'"><i class="fas fa-chart-line"></i> Keuangan</button>
         <button onclick="window.location.href='profil.html'"><i class="fas fa-user"></i> Profil</button>
+        <button onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>        
 
         <center>
             <div class="news-container">
